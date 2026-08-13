@@ -1,4 +1,17 @@
 import customtkinter as ctk
+def hello(to):
+    print(f"Hello {to}!")
+hello()
+name = input("What's your name? ").strip().title()
+hello(name)
+
+def authentication():
+       ctk.set_appearance_mode("dark")
+       ctk.set_default_color_theme("grey")
+       window = ctk.CTk()
+       window.title("User Login")
+       window.geometry("400x400")
+       title = ctk.CTkLabel()
 
 # Configure appearance
 ctk.set_appearance_mode("dark")
