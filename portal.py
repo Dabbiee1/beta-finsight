@@ -2,64 +2,92 @@ import customtkinter as ctk
 import main
 
 
-# Configure the appearance of FinSight
+# -----------------------------
+# FinSight appearance
+# -----------------------------
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 
-def authentication():
-    # Create the login window
-    portal = ctk.CTk()
+# -----------------------------
+# Login
+# -----------------------------
 
-    portal.title("FinSight Login")
-    portal.geometry("500x500")
+def authentication():
+
+    # Create the ONE main application window.
+    # We will reuse this same window for the dashboard.
+    app = ctk.CTk()
+
+    app.title("FinSight Login")
+    app.geometry("500x500")
+
+    # Frame containing the login interface
+    login_frame = ctk.CTkFrame(app)
+    login_frame.pack(
+        expand=True,
+        padx=40,
+        pady=40
+    )
 
     # FinSight title
     title = ctk.CTkLabel(
-        portal,
+        login_frame,
         text="FinSight",
         font=("Arial", 32, "bold")
     )
-    title.pack(pady=(70, 10))
+    title.pack(pady=(50, 10))
 
     # Subtitle
     subtitle = ctk.CTkLabel(
-        portal,
+        login_frame,
         text="Your financial eyes for growth",
         font=("Arial", 16)
     )
-    subtitle.pack(pady=(0, 40))
+    subtitle.pack(pady=(0, 35))
 
     # Name input
     name_entry = ctk.CTkEntry(
-        portal,
+        login_frame,
         placeholder_text="Enter your name",
         width=280,
         height=40
     )
     name_entry.pack(pady=10)
 
-    # Error / information message
+    # Message for invalid input
     message = ctk.CTkLabel(
-        portal,
+        login_frame,
         text="",
         font=("Arial", 14)
     )
     message.pack(pady=10)
 
-    # What happens when the button is clicked
+    # This function runs when the user presses the button.
     def login():
-        name = name_entry.get().strip()
 
-        if name:
-            portal.destroy()
-            main.open_dashboard(name)
-        else:
-            message.configure(text="Please enter your name.")
+        full_name = name_entry.get().strip()
+
+        # Make sure the user entered something.
+        if not full_name:
+            message.configure(
+                text="Please enter your name."
+            )
+            return
+
+        # Get only the first name.
+        first_name = full_name.split()[0]
+
+        # Remove the login interface.
+        login_frame.destroy()
+
+        # Turn the same application window into the dashboard.
+        main.open_dashboard(app, first_name)
 
     # Login button
     login_button = ctk.CTkButton(
-        portal,
+        login_frame,
         text="Enter FinSight",
         command=login,
         width=200,
@@ -67,10 +95,10 @@ def authentication():
     )
     login_button.pack(pady=20)
 
-    # Keep the login window open
-    portal.mainloop()
+    # Keep the application running.
+    app.mainloop()
 
 
-# Start the login screen
+# Only start the login screen when this file is run directly.
 if __name__ == "__main__":
     authentication()
