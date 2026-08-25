@@ -1,49 +1,76 @@
-
-def hello(to="Dabbie"):
-    return f"Hello {to}!"
-
 import customtkinter as ctk
+import main
+
+
+# Configure the appearance of FinSight
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
+
+
 def authentication():
-    #configure appearance of window
-       ctk.set_appearance_mode("dark")
-       ctk.set_default_color_theme("blue")
-       portal = ctk.CTk()
-       portal.title("Finsight Login")
-       portal.geometry("400x400")
-    #text you'd find on it
-       title = ctk.CTkLabel(
+    # Create the login window
+    portal = ctk.CTk()
+
+    portal.title("FinSight Login")
+    portal.geometry("500x500")
+
+    # FinSight title
+    title = ctk.CTkLabel(
         portal,
-        text="User Login",
-        font=("Arial", 18, "bold")
-            )
-       title.pack(pady="40")
-       subtitle = ctk.CTkLabel(
-       portal,
-       text="Enter your name to continue",
-       font=("Arial", 16)
-       )
-       subtitle.pack(pady=10)
+        text="FinSight",
+        font=("Arial", 32, "bold")
+    )
+    title.pack(pady=(70, 10))
 
-       name_entry = ctk.CTkEntry(
-       portal,
-       placeholder_text="Enter your name"
-       )
-       name_entry.pack(pady=10)
-       def login():
-             name = name_entry.get().strip().title()
-             if name == "Dabbie":
-                 portal.withdraw()
-                 import main
-             else:
-                 subtitle.configure(text="Sorry, you're not Dabbie 😭")
-       login_button = ctk.CTkButton(
-             portal,
-             text="Enter FinSight",
-             command=login
-              )
-       login_button.pack(pady=20)
-       portal.mainloop()
+    # Subtitle
+    subtitle = ctk.CTkLabel(
+        portal,
+        text="Your financial eyes for growth",
+        font=("Arial", 16)
+    )
+    subtitle.pack(pady=(0, 40))
 
-if "__main__" == __name__:
+    # Name input
+    name_entry = ctk.CTkEntry(
+        portal,
+        placeholder_text="Enter your name",
+        width=280,
+        height=40
+    )
+    name_entry.pack(pady=10)
+
+    # Error / information message
+    message = ctk.CTkLabel(
+        portal,
+        text="",
+        font=("Arial", 14)
+    )
+    message.pack(pady=10)
+
+    # What happens when the button is clicked
+    def login():
+        name = name_entry.get().strip()
+
+        if name:
+            portal.destroy()
+            main.open_dashboard(name)
+        else:
+            message.configure(text="Please enter your name.")
+
+    # Login button
+    login_button = ctk.CTkButton(
+        portal,
+        text="Enter FinSight",
+        command=login,
+        width=200,
+        height=40
+    )
+    login_button.pack(pady=20)
+
+    # Keep the login window open
+    portal.mainloop()
+
+
+# Start the login screen
+if __name__ == "__main__":
     authentication()
-

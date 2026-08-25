@@ -1,39 +1,83 @@
 import customtkinter as ctk
 
-# Configure appearance
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("blue")
 
-# Create the window
-app = ctk.CTk()
+def open_dashboard(name):
+    # Create the main FinSight window
+    app = ctk.CTk()
 
-app.title("FinSight")
-app.geometry("1000x650")
+    app.title("FinSight")
+    app.geometry("1000x650")
 
-# Welcome text
-title = ctk.CTkLabel(
-    app,
-    text="Welcome to FinSight 🚀",
-    font=("Arial", 32, "bold")
-)
+    # Welcome message
+    title = ctk.CTkLabel(
+        app,
+        text=f"Welcome to FinSight, {name}! 🚀",
+        font=("Arial", 32, "bold")
+    )
+    title.pack(pady=(70, 10))
 
-title.pack(pady=60)
+    # Subtitle
+    subtitle = ctk.CTkLabel(
+        app,
+        text="Your financial eyes for growth.",
+        font=("Arial", 18)
+    )
+    subtitle.pack(pady=(0, 50))
 
-subtitle = ctk.CTkLabel(
-    app,
-    text="Smart Financial Management for Small Businesses",
-    font=("Arial", 18)
-)
+    # Dashboard container
+    overview = ctk.CTkFrame(app)
+    overview.pack(
+        padx=40,
+        pady=20,
+        fill="x"
+    )
 
-subtitle.pack(pady=(10, 40)  )
+    # Balance section
+    balance = ctk.CTkLabel(
+        overview,
+        text="Current Balance\n₦0.00",
+        font=("Arial", 20, "bold")
+    )
+    balance.pack(
+        side="left",
+        expand=True,
+        padx=20,
+        pady=30
+    )
 
+    # Income section
+    income = ctk.CTkLabel(
+        overview,
+        text="Income\n₦0.00",
+        font=("Arial", 20, "bold")
+    )
+    income.pack(
+        side="left",
+        expand=True,
+        padx=20,
+        pady=30
+    )
 
-byline = ctk.CTkLabel(
-    app,
-    text="...your financial eyes for growth",
-    font=("Arial", 14, "italic")
-)
-byline.pack()
-# Start the application
+    # Expenses section
+    expenses = ctk.CTkLabel(
+        overview,
+        text="Expenses\n₦0.00",
+        font=("Arial", 20, "bold")
+    )
+    expenses.pack(
+        side="left",
+        expand=True,
+        padx=20,
+        pady=30
+    )
 
-app.mainloop()
+    # Temporary message
+    coming_soon = ctk.CTkLabel(
+        app,
+        text="Your business dashboard starts here.",
+        font=("Arial", 16)
+    )
+    coming_soon.pack(pady=40)
+
+    # Keep the dashboard open
+    app.mainloop()
