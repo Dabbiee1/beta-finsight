@@ -188,6 +188,170 @@ def open_dashboard(app, name):
         update_transaction_list()
         update_financial_summary()
 
+    def edit_transaction(transaction):
+
+        edit_window = ctk.CTkToplevel(app)
+
+        edit_window.title("Edit Transaction")
+        edit_window.geometry("500x450")
+
+        # Keep window above dashboard.
+        edit_window.transient(app)
+        edit_window.grab_set()
+        edit_window.focus_force()
+
+        # -----------------------------
+        # Window title
+        # -----------------------------
+
+        title = ctk.CTkLabel(
+            edit_window,
+            text="Edit Transaction",
+            font=("Arial", 24, "bold")
+        )
+
+        title.pack(pady=20)
+
+        # -----------------------------
+        # Transaction name
+        # -----------------------------
+
+        transaction_name_entry = ctk.CTkEntry(
+            edit_window,
+            width=300
+        )
+
+        transaction_name_entry.pack(pady=10)
+
+        transaction_name_entry.insert(
+            0,
+            transaction["name"]
+        )
+
+        # -----------------------------
+        # Amount
+        # -----------------------------
+
+        amount_entry = ctk.CTkEntry(
+            edit_window,
+            width=300
+        )
+
+        amount_entry.pack(pady=10)
+
+        amount_entry.insert(
+            0,
+            f"{transaction['amount']:,.2f}"
+        )
+
+        # -----------------------------
+        # Transaction type
+        # -----------------------------
+
+        type_menu = ctk.CTkOptionMenu(
+            edit_window,
+            values=[
+                "Income",
+                "Expense"
+            ],
+            width=300
+        )
+
+        type_menu.pack(pady=10)
+
+        type_menu.set(
+            transaction["type"]
+        )
+
+        # -----------------------------
+        # Status message
+        # -----------------------------
+
+        status_label = ctk.CTkLabel(
+            edit_window,
+            text=""
+        )
+
+        status_label.pack(pady=5)
+
+        # -----------------------------
+        # Save changes
+        # -----------------------------
+
+        def save_changes():
+
+            transaction_name = (
+                transaction_name_entry
+                .get()
+                .strip()
+            )
+
+            amount_text = (
+                amount_entry
+                .get()
+                .strip()
+            )
+
+            transaction_type = type_menu.get()
+
+            # Check empty fields.
+            if not transaction_name or not amount_text:
+                status_label.configure(
+                    text="Please fill in all fields."
+                )
+
+                return
+
+            # Check amount.
+            try:
+
+                amount = float(
+                    amount_text.replace(",", "")
+                )
+
+            except ValueError:
+
+                status_label.configure(
+                    text="Please enter a valid amount."
+                )
+
+                return
+
+            # Prevent zero/negative amounts.
+            if amount <= 0:
+                status_label.configure(
+                    text="Amount must be greater than 0."
+                )
+
+                return
+
+            # Update existing transaction.
+            transaction["name"] = transaction_name
+            transaction["amount"] = amount
+            transaction["type"] = transaction_type
+
+            # Refresh dashboard.
+            update_transaction_list()
+            update_financial_summary()
+
+            # Close edit window.
+            edit_window.destroy()
+
+        # -----------------------------
+        # Save button
+        # -----------------------------
+
+        save_button = ctk.CTkButton(
+            edit_window,
+            text="Save Changes",
+            command=save_changes
+        )
+
+        save_button.pack(pady=20)
+
+        # Automatically place cursor
+        # in the transaction name field.
+        transaction_name_entry.focus()
 
     # -----------------------------
     # Update transaction list
@@ -235,6 +399,19 @@ def open_dashboard(app, name):
                 pady=5
             )
 
+            edit_button = ctk.CTkButton(
+                transaction_row,
+                text="Edit",
+                width=80,
+                command=lambda t=transaction: edit_transaction(t)
+            )
+
+            edit_button.pack(
+                side="right",
+                padx=5,
+                pady=5
+            )
+
             delete_button = ctk.CTkButton(
                 transaction_row,
                 text="Delete",
@@ -247,7 +424,6 @@ def open_dashboard(app, name):
                 padx=10,
                 pady=5
             )
-
     # -----------------------------
     # Record Transaction
     # -----------------------------
