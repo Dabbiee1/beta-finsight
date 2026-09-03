@@ -1,7 +1,26 @@
 import customtkinter as ctk
+import json
+import os
 
 transactions = []
 
+DATA_FILE = "transactions.json"
+
+def load_transactions():
+    global transactions
+
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r") as file:
+                transactions = json.load(file)
+        except (json.JSONDecodeError, OSError):
+            transactions = []
+
+
+def save_transactions():
+
+    with open(DATA_FILE, "w") as file:
+        json.dump(transactions, file, indent=4)
 
 # -----------------------------
 # Helper function
@@ -27,6 +46,9 @@ def center_window(window, width, height):
 # -----------------------------
 
 def open_dashboard(app, name):
+
+    # Load previously saved transactions.
+    load_transactions()
 
     # ---------------------------------
     # Reconfigure the existing window
@@ -185,6 +207,8 @@ def open_dashboard(app, name):
 
         transactions.remove(transaction)
 
+        save_transactions()
+
         update_transaction_list()
         update_financial_summary()
 
@@ -329,6 +353,9 @@ def open_dashboard(app, name):
             transaction["name"] = transaction_name
             transaction["amount"] = amount
             transaction["type"] = transaction_type
+
+            #Save transaction
+            save_transactions()
 
             # Refresh dashboard.
             update_transaction_list()
@@ -577,6 +604,10 @@ def open_dashboard(app, name):
                 }
             )
 
+            # Save transaction to file.
+            save_transactions()
+
+            
             # Update dashboard.
             update_transaction_list()
             update_financial_summary()

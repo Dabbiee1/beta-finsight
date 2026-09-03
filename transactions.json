@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Sales",
+        "amount": 3000000.0,
+        "type": "Income"
+    },
+    {
+        "name": "Transport",
+        "amount": 120000.0,
+        "type": "Expense"
+    }
+]
