@@ -8,5 +8,20 @@
         "name": "Transport",
         "amount": 120000.0,
         "type": "Expense"
+    },
+    {
+        "name": "Sales",
+        "amount": 300000.0,
+        "type": "Income"
+    },
+    {
+        "name": "Electricity",
+        "amount": 100000.0,
+        "type": "Expense"
+    },
+    {
+        "name": "Food",
+        "amount": 180000.0,
+        "type": "Expense"
     }
 ]

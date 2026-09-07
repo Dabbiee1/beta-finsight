@@ -57,6 +57,22 @@ def open_dashboard(app, name):
     app.title("FinSight")
     app.geometry("1000x650")
 
+    # ---------------------------------
+    # Scrollable dashboard content
+    # ---------------------------------
+
+    dashboard_frame = ctk.CTkScrollableFrame(
+        app,
+        width=900,
+        height=560
+    )
+
+    dashboard_frame.pack(
+        padx=20,
+        pady=(70, 10),
+        fill="both",
+        expand=True
+    )
     # -----------------------------
     # Top-right user name
     # -----------------------------
@@ -78,7 +94,7 @@ def open_dashboard(app, name):
     # -----------------------------
 
     heading = ctk.CTkLabel(
-        app,
+        dashboard_frame,
         text="Your business starts right here.",
         font=("Arial", 32, "bold")
     )
@@ -91,7 +107,7 @@ def open_dashboard(app, name):
     # Dashboard overview
     # -----------------------------
 
-    overview = ctk.CTkFrame(app)
+    overview = ctk.CTkFrame(dashboard_frame)
 
     overview.pack(
         padx=40,
@@ -178,27 +194,50 @@ def open_dashboard(app, name):
     # -----------------------------
 
     transaction_title = ctk.CTkLabel(
-        app,
+        dashboard_frame,
         text="Recent Transactions",
         font=("Arial", 20, "bold")
     )
 
     transaction_title.pack(
-        pady=(5, 5)
+        pady=(25, 10)
     )
 
     transaction_frame = ctk.CTkScrollableFrame(
-        app,
+        dashboard_frame,
         width=850,
-        height=100
     )
 
     transaction_frame.pack(
-        padx=40,
-        pady=5,
+        padx=20,
+        pady=(0, 15),
         fill="x"
     )
 
+    # -----------------------------
+    # Insights
+    # -----------------------------
+
+    insight_title = ctk.CTkLabel(
+        dashboard_frame,
+        text="Insights",
+        font=("Arial", 20, "bold")
+    )
+
+    insight_title.pack(
+        pady=(25, 10)
+    )
+
+    insight_frame = ctk.CTkFrame(
+        dashboard_frame,
+        width=850
+    )
+
+    insight_frame.pack(
+        padx=20,
+        pady=(0, 20),
+        fill="x"
+    )
     # -----------------------------
     # Delete transaction
     # -----------------------------
@@ -211,6 +250,7 @@ def open_dashboard(app, name):
 
         update_transaction_list()
         update_financial_summary()
+        update_insights()
 
     def edit_transaction(transaction):
 
@@ -360,6 +400,7 @@ def open_dashboard(app, name):
             # Refresh dashboard.
             update_transaction_list()
             update_financial_summary()
+            update_insights()
 
             # Close edit window.
             edit_window.destroy()
@@ -401,31 +442,44 @@ def open_dashboard(app, name):
 
             return
 
-        # Display every transaction.
+                # Display every transaction.
         for transaction in transactions:
-            transaction_row = ctk.CTkFrame(transaction_frame)
+            transaction_row = ctk.CTkFrame(
+                transaction_frame,
+                corner_radius=10
+            )
+
             transaction_row.pack(
                 fill="x",
                 padx=10,
-                pady=3
+                pady=5
             )
 
             transaction_text = (
-                f"{transaction['type']}  |  "
-                f"{transaction['name']}  |  "
-                f"₦{transaction['amount']:,.2f}"
+                f"{transaction['type']}\n"
+                f"{transaction['name']}"
             )
 
             ctk.CTkLabel(
                 transaction_row,
                 text=transaction_text,
-                font=("Arial", 14)
+                font=("Arial", 14, "bold"),
+                anchor="w"
             ).pack(
                 side="left",
-                padx=10,
-                pady=5
+                padx=15,
+                pady=10
             )
 
+            ctk.CTkLabel(
+                transaction_row,
+                text=f"₦{transaction['amount']:,.2f}",
+                font=("Arial", 14, "bold")
+            ).pack(
+                side="right",
+                padx=15,
+                pady=10
+            )
             edit_button = ctk.CTkButton(
                 transaction_row,
                 text="Edit",
@@ -451,6 +505,140 @@ def open_dashboard(app, name):
                 padx=10,
                 pady=5
             )
+
+    # -----------------------------
+    # Insights
+    # -----------------------------
+
+    def update_insights():
+
+        # Remove old insight widgets
+        for widget in insight_frame.winfo_children():
+            widget.destroy()
+
+        if not transactions:
+            empty_label = ctk.CTkLabel(
+                insight_frame,
+                text="Record some transactions to see your financial insights.",
+                font=("Arial", 14)
+            )
+            empty_label.pack(pady=15)
+            return
+
+        total_income = sum(
+            t["amount"] for t in transactions
+            if t["type"] == "Income"
+        )
+
+        total_expenses = sum(
+            t["amount"] for t in transactions
+            if t["type"] == "Expense"
+        )
+
+        balance = total_income - total_expenses
+
+        # Biggest expense
+        expenses = [
+            t for t in transactions
+            if t["type"] == "Expense"
+        ]
+
+        biggest_expense = max(
+            expenses,
+            key=lambda t: t["amount"]
+        ) if expenses else None
+
+        # Financial message
+        if balance > 0:
+            health_message = "You're currently spending less than you're earning."
+        elif balance < 0:
+            health_message = "Your expenses currently exceed your income."
+        else:
+            health_message = "Your income and expenses are currently balanced."
+
+        # Financial health
+        health_label = ctk.CTkLabel(
+            insight_frame,
+            text=f"Financial Health\n{health_message}",
+            font=("Arial", 15, "bold"),
+            wraplength=750
+        )
+        health_label.pack(pady=(10, 15))
+
+        # Biggest expense
+        if biggest_expense:
+            biggest_label = ctk.CTkLabel(
+                insight_frame,
+                text=(
+                    f"Biggest Expense\n"
+                    f"{biggest_expense['name']} — "
+                    f"₦{biggest_expense['amount']:,.2f}"
+                ),
+                font=("Arial", 14)
+            )
+            biggest_label.pack(pady=(5, 15))
+        # Spending Breakdown
+        expense_totals = {}
+
+        for transaction in expenses:
+            name = transaction["name"]
+            expense_totals[name] = expense_totals.get(name, 0) + transaction["amount"]
+
+        breakdown_title = ctk.CTkLabel(
+            insight_frame,
+            text="Spending Breakdown",
+            font=("Arial", 15, "bold")
+        )
+        breakdown_title.pack(pady=(12, 8))
+
+        if expense_totals:
+            largest_amount = max(expense_totals.values())
+
+            for name, amount in sorted(
+                    expense_totals.items(),
+                    key=lambda item: item[1],
+                    reverse=True
+            ):
+                row = ctk.CTkFrame(
+                    insight_frame,
+                    fg_color="transparent"
+                )
+                row.pack(fill="x", padx=40, pady=4)
+
+                name_label = ctk.CTkLabel(
+                    row,
+                    text=name,
+                    font=("Arial", 13),
+                    width=140,
+                    anchor="w"
+                )
+                name_label.pack(side="left")
+
+                bar = ctk.CTkProgressBar(
+                    row,
+                    width=400
+                )
+                bar.pack(side="left", padx=10)
+
+                # Show the amount relative to the largest expense
+                bar.set(amount / largest_amount)
+
+                amount_label = ctk.CTkLabel(
+                    row,
+                    text=f"₦{amount:,.2f}",
+                    font=("Arial", 13),
+                    width=130,
+                    anchor="e"
+                )
+                amount_label.pack(side="right")
+
+        # Remaining balance
+        balance_label = ctk.CTkLabel(
+            insight_frame,
+            text=f"Money Remaining\n₦{balance:,.2f}",
+            font=("Arial", 14)
+        )
+        balance_label.pack(pady=(15, 20))
     # -----------------------------
     # Record Transaction
     # -----------------------------
@@ -611,6 +799,7 @@ def open_dashboard(app, name):
             # Update dashboard.
             update_transaction_list()
             update_financial_summary()
+            update_insights()
 
             # Confirmation.
             status_label.configure(
@@ -651,7 +840,7 @@ def open_dashboard(app, name):
     # -----------------------------
 
     record_button = ctk.CTkButton(
-        app,
+        dashboard_frame,
         text="Record a Transaction",
         command=record_transaction
     )
@@ -665,7 +854,7 @@ def open_dashboard(app, name):
     # -----------------------------
 
     next_text = ctk.CTkLabel(
-        app,
+        dashboard_frame,
         text="What's next?",
         font=("Arial", 18, "italic")
     )
@@ -682,6 +871,7 @@ def open_dashboard(app, name):
 
     update_transaction_list()
     update_financial_summary()
+    update_insights()
 
     # -----------------------------
     # Welcome popup
