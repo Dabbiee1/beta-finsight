@@ -203,7 +203,7 @@ def open_dashboard(app, name):
         pady=(25, 10)
     )
 
-    transaction_frame = ctk.CTkScrollableFrame(
+    transaction_frame = ctk.CTkFrame(
         dashboard_frame,
         width=850,
     )
@@ -842,7 +842,7 @@ def open_dashboard(app, name):
     record_button = ctk.CTkButton(
         dashboard_frame,
         text="Record a Transaction",
-        command=record_transaction
+        command=lambda: record_transaction
     )
 
     record_button.pack(
