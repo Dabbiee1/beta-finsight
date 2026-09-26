@@ -6,6 +6,10 @@ transactions = []
 
 DATA_FILE = "transactions.json"
 
+products = []
+
+PRODUCTS_FILE = "products.json"
+
 def load_transactions():
     global transactions
 
@@ -16,11 +20,51 @@ def load_transactions():
         except (json.JSONDecodeError, OSError):
             transactions = []
 
-
 def save_transactions():
 
     with open(DATA_FILE, "w") as file:
         json.dump(transactions, file, indent=4)
+
+def load_products():
+    global products
+
+    if os.path.exists(PRODUCTS_FILE):
+        with open(PRODUCTS_FILE, "r") as file:
+            products = json.load(file)
+
+def save_products():
+    with open(PRODUCTS_FILE, "w") as file:
+        json.dump(products, file, indent=4)
+
+def add_product(name, quantity, cost, selling_price, reorder_level):
+    product = {
+        "name": name,
+        "quantity": quantity,
+        "cost": cost,
+        "selling_price": selling_price,
+        "reorder_level": reorder_level
+    }
+
+    products.append(product)
+    save_products()
+
+def record_stock(name, quantity, cost, selling_price, reorder_level):
+    for product in products:
+        if product["name"].lower() == name.lower():
+            product["quantity"] += quantity
+            product["cost"] = cost
+            product["selling_price"] = selling_price
+            product["reorder_level"] = reorder_level
+            save_products()
+            return
+
+    add_product(
+        name,
+        quantity,
+        cost,
+        selling_price,
+        reorder_level
+    )
 
 # -----------------------------
 # Helper function
@@ -49,7 +93,7 @@ def open_dashboard(app, name):
 
     # Load previously saved transactions.
     load_transactions()
-
+    load_products()
     # ---------------------------------
     # Reconfigure the existing window
     # ---------------------------------
@@ -190,6 +234,31 @@ def open_dashboard(app, name):
         )
 
     # -----------------------------
+    # Current Stock
+    # -----------------------------
+
+    stock_title = ctk.CTkLabel(
+        dashboard_frame,
+        text="Current Stock",
+        font=("Arial", 20, "bold")
+    )
+
+    stock_title.pack(
+        pady=(25, 10)
+    )
+
+    stock_frame = ctk.CTkFrame(
+        dashboard_frame,
+        width=850
+    )
+
+    stock_frame.pack(
+        padx=20,
+        pady=(0, 15),
+        fill="x"
+    )
+
+    # -----------------------------
     # Recent Transactions
     # -----------------------------
 
@@ -238,6 +307,76 @@ def open_dashboard(app, name):
         pady=(0, 20),
         fill="x"
     )
+    # -----------------------------
+    # Update stock list
+    # -----------------------------
+
+    def update_stock_list():
+
+        # Remove old stock widgets.
+        for widget in stock_frame.winfo_children():
+            widget.destroy()
+
+        # Show message if there is no stock.
+        if not products:
+            ctk.CTkLabel(
+                stock_frame,
+                text="No stock recorded yet."
+            ).pack(
+                pady=10
+            )
+
+            return
+
+        # Display every product.
+        for product in products:
+
+            product_row = ctk.CTkFrame(
+                stock_frame,
+                corner_radius=10
+            )
+
+            product_row.pack(
+                fill="x",
+                padx=10,
+                pady=5
+            )
+
+            product_name = ctk.CTkLabel(
+                product_row,
+                text=product["name"],
+                font=("Arial", 14, "bold"),
+                anchor="w"
+            )
+
+            product_name.pack(
+                side="left",
+                padx=15,
+                pady=10
+            )
+
+            quantity_label = ctk.CTkLabel(
+                product_row,
+                text=f"Quantity: {product['quantity']}",
+                font=("Arial", 13)
+            )
+
+            quantity_label.pack(
+                side="left",
+                padx=15
+            )
+
+            price_label = ctk.CTkLabel(
+                product_row,
+                text=f"Selling: ₦{product['selling_price']:,.2f}",
+                font=("Arial", 13)
+            )
+
+            price_label.pack(
+                side="right",
+                padx=15
+            )
+
     # -----------------------------
     # Delete transaction
     # -----------------------------
@@ -836,6 +975,188 @@ def open_dashboard(app, name):
         transaction_name_entry.focus()
 
     # -----------------------------
+    # Record Stock
+    # -----------------------------
+
+    def record_stock_window():
+
+        stock_window = ctk.CTkToplevel(app)
+
+        stock_window.title("Record Stock")
+        stock_window.geometry("500x550")
+
+        stock_window.transient(app)
+        stock_window.grab_set()
+        stock_window.focus_force()
+
+        # -----------------------------
+        # Window title
+        # -----------------------------
+
+        title = ctk.CTkLabel(
+            stock_window,
+            text="Record Stock",
+            font=("Arial", 24, "bold")
+        )
+
+        title.pack(pady=20)
+
+        # -----------------------------
+        # Product name
+        # -----------------------------
+
+        name_entry = ctk.CTkEntry(
+            stock_window,
+            placeholder_text="Product name",
+            width=300
+        )
+
+        name_entry.pack(pady=10)
+
+        # -----------------------------
+        # Quantity
+        # -----------------------------
+
+        quantity_entry = ctk.CTkEntry(
+            stock_window,
+            placeholder_text="Quantity received",
+            width=300
+        )
+
+        quantity_entry.pack(pady=10)
+
+        # -----------------------------
+        # Cost per unit
+        # -----------------------------
+
+        cost_entry = ctk.CTkEntry(
+            stock_window,
+            placeholder_text="Cost per unit",
+            width=300
+        )
+
+        cost_entry.pack(pady=10)
+
+        # -----------------------------
+        # Selling price
+        # -----------------------------
+
+        selling_price_entry = ctk.CTkEntry(
+            stock_window,
+            placeholder_text="Selling price per unit",
+            width=300
+        )
+
+        selling_price_entry.pack(pady=10)
+
+        # -----------------------------
+        # Reorder level
+        # -----------------------------
+
+        reorder_entry = ctk.CTkEntry(
+            stock_window,
+            placeholder_text="Reorder level",
+            width=300
+        )
+
+        reorder_entry.pack(pady=10)
+
+        # -----------------------------
+        # Status
+        # -----------------------------
+
+        status_label = ctk.CTkLabel(
+            stock_window,
+            text=""
+        )
+
+        status_label.pack(pady=5)
+
+        # -----------------------------
+        # Save stock
+        # -----------------------------
+
+        def save_stock():
+
+            name = name_entry.get().strip()
+            quantity_text = quantity_entry.get().strip()
+            cost_text = cost_entry.get().strip()
+            selling_price_text = selling_price_entry.get().strip()
+            reorder_text = reorder_entry.get().strip()
+
+            if not name or not quantity_text or not cost_text or not selling_price_text or not reorder_text:
+                status_label.configure(
+                    text="Please fill in all fields."
+                )
+                return
+
+            try:
+                quantity = int(quantity_text)
+                cost = float(cost_text.replace(",", ""))
+                selling_price = float(selling_price_text.replace(",", ""))
+                reorder_level = int(reorder_text)
+
+            except ValueError:
+                status_label.configure(
+                    text="Please enter valid numbers."
+                )
+                return
+
+            if quantity <= 0:
+                status_label.configure(
+                    text="Quantity must be greater than 0."
+                )
+                return
+
+            if cost < 0 or selling_price < 0:
+                status_label.configure(
+                    text="Prices cannot be negative."
+                )
+                return
+
+            if reorder_level < 0:
+                status_label.configure(
+                    text="Reorder level cannot be negative."
+                )
+                return
+
+            record_stock(
+                name,
+                quantity,
+                cost,
+                selling_price,
+                reorder_level
+            )
+
+            update_stock_list()
+
+            status_label.configure(
+                text="Stock recorded!"
+            )
+
+            name_entry.delete(0, "end")
+            quantity_entry.delete(0, "end")
+            cost_entry.delete(0, "end")
+            selling_price_entry.delete(0, "end")
+            reorder_entry.delete(0, "end")
+
+            name_entry.focus()
+
+        # -----------------------------
+        # Save button
+        # -----------------------------
+
+        save_button = ctk.CTkButton(
+            stock_window,
+            text="Record Stock",
+            command=save_stock
+        )
+
+        save_button.pack(pady=20)
+
+        name_entry.focus()
+
+    # -----------------------------
     # Record transaction button
     # -----------------------------
 
@@ -848,6 +1169,14 @@ def open_dashboard(app, name):
     record_button.pack(
         pady=10
     )
+
+    stock_button = ctk.CTkButton(
+        dashboard_frame,
+        text="Record Stock",
+        command=record_stock_window
+    )
+
+    stock_button.pack(pady=10)
 
     # -----------------------------
     # "What's next?"
@@ -868,7 +1197,7 @@ def open_dashboard(app, name):
     # Start dashboard with
     # current financial totals.
     # -----------------------------
-
+    update_stock_list()
     update_transaction_list()
     update_financial_summary()
     update_insights()
