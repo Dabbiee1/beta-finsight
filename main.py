@@ -10,6 +10,7 @@ products = []
 
 PRODUCTS_FILE = "products.json"
 
+
 def load_transactions():
     global transactions
 
@@ -20,10 +21,11 @@ def load_transactions():
         except (json.JSONDecodeError, OSError):
             transactions = []
 
-def save_transactions():
 
+def save_transactions():
     with open(DATA_FILE, "w") as file:
         json.dump(transactions, file, indent=4)
+
 
 def load_products():
     global products
@@ -32,9 +34,11 @@ def load_products():
         with open(PRODUCTS_FILE, "r") as file:
             products = json.load(file)
 
+
 def save_products():
     with open(PRODUCTS_FILE, "w") as file:
         json.dump(products, file, indent=4)
+
 
 def add_product(name, quantity, cost, selling_price, reorder_level):
     product = {
@@ -47,6 +51,7 @@ def add_product(name, quantity, cost, selling_price, reorder_level):
 
     products.append(product)
     save_products()
+
 
 def record_stock(name, quantity, cost, selling_price, reorder_level):
     for product in products:
@@ -66,12 +71,12 @@ def record_stock(name, quantity, cost, selling_price, reorder_level):
         reorder_level
     )
 
+
 # -----------------------------
 # Helper function
 # -----------------------------
 
 def center_window(window, width, height):
-
     # Ask the operating system for the screen dimensions.
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
@@ -90,7 +95,6 @@ def center_window(window, width, height):
 # -----------------------------
 
 def open_dashboard(app, name):
-
     # Load previously saved transactions.
     load_transactions()
     load_products()
@@ -307,6 +311,7 @@ def open_dashboard(app, name):
         pady=(0, 20),
         fill="x"
     )
+
     # -----------------------------
     # Update stock list
     # -----------------------------
@@ -330,7 +335,6 @@ def open_dashboard(app, name):
 
         # Display every product.
         for product in products:
-
             product_row = ctk.CTkFrame(
                 stock_frame,
                 corner_radius=10
@@ -533,7 +537,7 @@ def open_dashboard(app, name):
             transaction["amount"] = amount
             transaction["type"] = transaction_type
 
-            #Save transaction
+            # Save transaction
             save_transactions()
 
             # Refresh dashboard.
@@ -581,7 +585,7 @@ def open_dashboard(app, name):
 
             return
 
-                # Display every transaction.
+            # Display every transaction.
         for transaction in transactions:
             transaction_row = ctk.CTkFrame(
                 transaction_frame,
@@ -778,6 +782,26 @@ def open_dashboard(app, name):
             font=("Arial", 14)
         )
         balance_label.pack(pady=(15, 20))
+
+        # Stock value
+        stock_value = sum(
+            product["quantity"] * product["cost"]
+            for product in products
+        )
+
+        stock_value_label = ctk.CTkLabel(
+            insight_frame,
+            text=(
+                f"Money Tied Up in Stock\n"
+                f"₦{stock_value:,.2f}"
+            ),
+            font=("Arial", 14)
+        )
+
+        stock_value_label.pack(
+            pady=(5, 20)
+        )
+
     # -----------------------------
     # Record Transaction
     # -----------------------------
@@ -893,7 +917,6 @@ def open_dashboard(app, name):
 
             # Check empty fields.
             if not transaction_name or not amount_text:
-
                 status_label.configure(
                     text="Please fill in all fields."
                 )
@@ -915,7 +938,6 @@ def open_dashboard(app, name):
 
             # Prevent zero/negative amounts.
             if amount <= 0:
-
                 status_label.configure(
                     text="Amount must be greater than 0."
                 )
@@ -934,7 +956,6 @@ def open_dashboard(app, name):
             # Save transaction to file.
             save_transactions()
 
-            
             # Update dashboard.
             update_transaction_list()
             update_financial_summary()
@@ -1130,6 +1151,8 @@ def open_dashboard(app, name):
 
             update_stock_list()
 
+            update_insights()
+
             status_label.configure(
                 text="Stock recorded!"
             )
@@ -1226,11 +1249,11 @@ def open_dashboard(app, name):
 
     # Center popup over dashboard.
     x = app_x + (
-        app_width - popup_width
+            app_width - popup_width
     ) // 2
 
     y = app_y + (
-        app_height - popup_height
+            app_height - popup_height
     ) // 2
 
     # Set popup position.
